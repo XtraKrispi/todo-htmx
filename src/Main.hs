@@ -107,7 +107,7 @@ renderTodo isEdit todo =
             [ value_ todo.description
             , class_ "edit"
             , name_ "description"
-            , hxTrigger "blur"
+            , hxTrigger "blur, keyup[key=='Enter']"
             , hxPatch ("/api/todos/" <> tshow todo.id <> "/description")
             ]
 todosSection :: Bool -> [Todo] -> Html ()
@@ -234,11 +234,11 @@ main = do
     get "/" $ html $ renderText indexPage
     get "/api/todos" $ processTodo All
     post "/api/todos" do
-      newTodo <- param "new-todo"
+      newTodo :: Text <- param "new-todo"
       liftIO $
         withConnection
           dbName
-          ( \conn -> execute conn "INSERT INTO todos(description, is_completed) VALUES(?, ?)" (newTodo :: Text, False)
+          ( \conn -> execute conn "INSERT INTO todos(description, is_completed) VALUES(?, ?)" (newTodo, False)
           )
       hxTriggerResponse "refresh-items"
       html $
@@ -256,7 +256,7 @@ main = do
       liftIO $
         withConnection
           dbName
-          ( \conn -> execute conn "DELETE FROM todos WHERE Id = ?" [todoId]
+          ( \conn -> execute conn "DELETE FROM todos WHERE Id = ?" (Only todoId)
           )
       hxTriggerResponse "refresh-items"
       html ""
@@ -275,7 +275,7 @@ main = do
       liftIO $
         withConnection
           dbName
-          ( \conn -> execute conn "UPDATE todos SET is_completed = ?" [checked]
+          ( \conn -> execute conn "UPDATE todos SET is_completed = ?" (Only checked)
           )
       hxTriggerResponse "refresh-items"
       html $ renderText $ toggleAll checked
