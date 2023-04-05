@@ -182,6 +182,7 @@ footer currFilter todos =
               "Completed"
         when (any ((.isCompleted)) todos) do
           button_ [class_ "clear-completed", hxDelete "/api/todos/clear-completed"] "Clear completed"
+
 toggleAll :: Bool -> Html ()
 toggleAll checked = do
   input_
